@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("VOL_BAR", "progress: " + ((float)volume_bar.getProgress()/100));
                 current_tone = new Tone();
                 Log.d("POINTER", "current_tone " + current_tone);
-                current_tone.set_Duration(1);
+                current_tone.set_Duration(5);
                 current_tone.set_Freq(freq_bar.getProgress());
                 current_tone.set_Pitch(pitch_bar.getProgress() - 10);
                 current_tone.set_Volume(((float)volume_bar.getProgress()/100));

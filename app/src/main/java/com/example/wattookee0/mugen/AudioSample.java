@@ -23,11 +23,11 @@ public class AudioSample {
 
     public float[] compile_Sample(int sample_length) {
         sample = new float[sample_length];
-        int i = 0;
+        /*int i = 0;
         while (i < (int)sample_length) {
             sample[i] = (float)(volume[i]*Math.sin(((frequency[i]+pitch[i]) * two_pi * i)/sample_rate));
             i++;
-        }
+        }*/
         return sample;
     }
 

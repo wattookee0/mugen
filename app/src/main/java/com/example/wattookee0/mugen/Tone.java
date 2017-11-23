@@ -14,17 +14,21 @@ import java.util.TimerTask;
 
 public class Tone {
 
-
+    static final float two_pi = 2*(float)Math.PI;
 
     //user defined variables
-    int track_duration_in_seconds = 1;
+    int track_duration_in_seconds = 2;
+    int test = 0;
+    int sample_length = track_duration_in_seconds;
     private int pitch = 0;
     private float volume = 1.0f;
 
     //dev defined variables and calculated
+    public float sample[];
     private int sample_rate = 192000;
+
     int frequency_in_Hz = 440;
-    private int samples_per_cycle;
+    private int floats_per_cycle;
 
     //objects
     AudioTrack track;
@@ -71,12 +75,26 @@ public class Tone {
                 sample_rate,
                 AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_FLOAT,
-                track.getMinBufferSize(sample_rate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_FLOAT),
+                sample_rate,
                 AudioManager.MODE_NORMAL);
-        AudioSample sample = new AudioSample();
-        track.write(sample.compile_Sample(sample_rate/frequency_in_Hz), 0, (int)samples_per_cycle, AudioTrack.WRITE_NON_BLOCKING);
+        //AudioSample sample = new AudioSample();
+        floats_per_cycle = sample_rate/frequency_in_Hz;
+        track.setBufferSizeInFrames(floats_per_cycle);
+        Log.d("BUFFER:", "capacity:" + track.getBufferCapacityInFrames());
+        sample_length = sample_rate*track_duration_in_seconds;
+        Log.d("SAMPLE LENGTH:", ":" + sample_length);
+
+        sample = new float[sample_length];
+        int i = 0;
+        int max_frames = track.getBufferCapacityInFrames();
+        while (i < (int)floats_per_cycle) {
+            sample[i] = (float)(Math.sin(((frequency_in_Hz+pitch) * two_pi * i)/sample_rate));
+            i++;
+        }
+        test = track.write(sample, 0, (int)floats_per_cycle, AudioTrack.WRITE_NON_BLOCKING);
+        Log.d("WRITTEN: ", ": "+test);
         track.setVolume(volume);
-        track.setLoopPoints(0, samples_per_cycle-1, -1);
+        track.setLoopPoints(0, floats_per_cycle-1, -1);
         track.play();
         track_timer.schedule(track_length, track_duration_in_seconds*1000+1);
     }
