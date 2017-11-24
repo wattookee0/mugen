@@ -2,6 +2,7 @@ package com.example.wattookee0.mugen;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.support.design.widget.FloatingActionButton;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         final SeekBar freq_bar = (SeekBar) findViewById(R.id.freq_bar);
         final SeekBar pitch_bar = (SeekBar) findViewById(R.id.pitch_bar);
         final SeekBar volume_bar = (SeekBar) findViewById(R.id.volume_bar);
+        final SurfaceView waveform_graph = (SurfaceView) findViewById((R.id.waveform_graph));
 
        FloatingActionButton play_button = (FloatingActionButton) findViewById(R.id.play_button);
             play_button.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
                 current_tone.set_Volume(((float)volume_bar.getProgress()/100));
                 Log.d("POINTER", "current_tone " + current_tone);
                 current_tone.play_Tone();
+                Waveform waveform = new Waveform(current_tone.get_Sample(), current_tone.get_Floats_Per_Cycle());
+                waveform.display_Waveform(waveform_graph);
             }
         });
 

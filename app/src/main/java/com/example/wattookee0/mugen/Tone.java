@@ -19,6 +19,7 @@ public class Tone {
     //user defined variables
     int track_duration_in_seconds = 2;
     int test = 0;
+
     int sample_length = track_duration_in_seconds;
     private int pitch = 0;
     private float volume = 1.0f;
@@ -69,6 +70,10 @@ public class Tone {
         track_duration_in_seconds = new_track_duration_in_seconds;
     }
 
+    public float[] get_Sample() { return sample; }
+    public int get_Sample_Length() { return sample_length; }
+    public int get_Floats_Per_Cycle() {return floats_per_cycle;}
+
     public void play_Tone() {
         track = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
@@ -89,6 +94,7 @@ public class Tone {
         int max_frames = track.getBufferCapacityInFrames();
         while (i < (int)floats_per_cycle) {
             sample[i] = (float)(Math.sin(((frequency_in_Hz+pitch) * two_pi * i)/sample_rate));
+            //sample[i] = (float)Math.abs((Math.sin( ((frequency_in_Hz+pitch * two_pi * i))/sample_rate ) ));
             i++;
         }
         test = track.write(sample, 0, (int)floats_per_cycle, AudioTrack.WRITE_NON_BLOCKING);
