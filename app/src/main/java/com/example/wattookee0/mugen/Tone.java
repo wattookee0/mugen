@@ -74,6 +74,36 @@ public class Tone {
     public int get_Sample_Length() { return sample_length; }
     public int get_Floats_Per_Cycle() {return floats_per_cycle;}
 
+    public void generate_Sample() {
+        floats_per_cycle = sample_rate/frequency_in_Hz;
+        sample = new float[floats_per_cycle];
+        int i = 0;
+        while (i < (int)floats_per_cycle) {
+            if (i < floats_per_cycle/4) {
+                sample[i] = (float) (Math.sin(((frequency_in_Hz + pitch) * two_pi * i) / sample_rate));
+            }
+            if ((i >= floats_per_cycle/4) && (i < floats_per_cycle/2)) {
+                //sample[i] = (float)Math.abs(Math.sin( ((frequency_in_Hz+pitch) * two_pi * i)/sample_rate ) );
+                if (Math.sin( ( (frequency_in_Hz + pitch) * two_pi * i) / sample_rate) > 0.0) {
+                    sample[i] = (float) .99;
+                } else {
+                    sample[i] = (float) -.99;
+                }
+            }
+            if ((i>=floats_per_cycle/2) && (i < 3*floats_per_cycle/4)) {
+                if (Math.sin( ( (frequency_in_Hz + pitch) * two_pi * i) / sample_rate) > 0.0) {
+                    sample[i] = (float) .99;
+                } else {
+                    sample[i] = (float) -.99;
+                }
+            }
+            if (i >= 3*floats_per_cycle/4) {
+                sample[i] = (float) (Math.sin(((frequency_in_Hz + pitch) * two_pi * i) / sample_rate));
+            }
+            i++;
+        }
+    }
+
     public void play_Tone() {
         track = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
@@ -83,20 +113,8 @@ public class Tone {
                 sample_rate,
                 AudioManager.MODE_NORMAL);
         //AudioSample sample = new AudioSample();
-        floats_per_cycle = sample_rate/frequency_in_Hz;
         track.setBufferSizeInFrames(floats_per_cycle);
         Log.d("BUFFER:", "capacity:" + track.getBufferCapacityInFrames());
-        sample_length = sample_rate*track_duration_in_seconds;
-        Log.d("SAMPLE LENGTH:", ":" + sample_length);
-
-        sample = new float[sample_length];
-        int i = 0;
-        int max_frames = track.getBufferCapacityInFrames();
-        while (i < (int)floats_per_cycle) {
-            sample[i] = (float)(Math.sin(((frequency_in_Hz+pitch) * two_pi * i)/sample_rate));
-            //sample[i] = (float)Math.abs((Math.sin( ((frequency_in_Hz+pitch * two_pi * i))/sample_rate ) ));
-            i++;
-        }
         test = track.write(sample, 0, (int)floats_per_cycle, AudioTrack.WRITE_NON_BLOCKING);
         Log.d("WRITTEN: ", ": "+test);
         track.setVolume(volume);
