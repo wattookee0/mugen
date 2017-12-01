@@ -1,88 +1,118 @@
 package com.example.wattookee0.mugen;
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-
-import java.lang.reflect.Array;
-
-import javax.security.auth.callback.Callback;
 
 /**
- * Created by wattookee0 on 11/23/2017.
+ * Created by wattookee0 on 11/28/2017.
  */
 
-public class Waveform extends SurfaceView implements SurfaceHolder.Callback {
+public class Waveform {
 
-    float waveform[];
-    int waveform_length;
-    SurfaceHolder holder;
-
-    public Waveform(Context c, AttributeSet a) {
-        super(c, a);
-        holder = this.getHolder();
+    public enum shape_e {
+        SINE,
+        SQUARE,
+        SAW,
+        RECTIFIED
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        Log.d("SHC", "FUCK");
+    static final int sample_rate = 192000;
+    static final float two_pi = (float)Math.PI*2;
+
+    public float waveform[];
+    private int m_freq;
+    public int floats_per_cycle;
+    private shape_e m_shape;
+
+    public int get_floats_per_cycle() {
+        return floats_per_cycle;
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.d("SHC", "SHIT");
+    public float[] get_waveform() {
+        return waveform;
     }
 
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d("SHC", "ASS");
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        int i = 0;
-        int j = 0;
-        super.onDraw(canvas);
-        if (waveform == null) {
-            Log.d("WAVEFORM", "no waveform");
-        } else {
-            Log.d("WAVEFORM", "onDraw()");
-            //canvas = holder.lockCanvas();
-            canvas.drawColor(Color.WHITE);
-            int canvas_middle = canvas.getHeight()/2;
-            Paint brush = new Paint();
-            brush.setColor(Color.GRAY);
-            brush.setStyle(Paint.Style.STROKE);
-            brush.setStrokeWidth(5);
-            canvas.drawLine(0, canvas_middle, canvas.getWidth(), canvas_middle, brush);
-            brush.setColor(Color.BLUE);
-            brush.setStrokeWidth(10);
-            Path path = new Path();
-            path.moveTo(0,canvas_middle-waveform[0]*100);
-            Log.d("WAVEFORM", "length: "+ waveform_length);
-            while (i + j < canvas.getWidth()) {
-                while (i < waveform_length) {
-                    path.lineTo(i+j, canvas_middle - waveform[i] * 100);
-                    i++;
-                }
-                i = 0;
-                j+=waveform_length;
-            }
-            canvas.drawPath(path, brush);
+    public void set_waveform(int new_frequency, shape_e shape) {
+        floats_per_cycle = sample_rate/new_frequency;
+        m_shape = shape;
+        m_freq = new_frequency;
+        waveform = new float[floats_per_cycle];
+        switch(shape) {
+            case SINE:
+                sine_Wave();
+                break;
+            case SQUARE:
+                square_Wave();
+                break;
+            case SAW:
+                saw_Wave();
+                break;
+            case RECTIFIED:
+                rectified_Wave();
+                break;
+            default:
+                sine_Wave();
+                break;
         }
     }
 
-    public void set_Waveform(float[] data, int data_length) {
-        waveform = data;
-        waveform_length = data_length;
-        this.setWillNotDraw(false);
-        //this.setZOrderOnTop(true);
+    public Waveform(int frequency, shape_e shape) {
+        floats_per_cycle = sample_rate/frequency;
+        m_shape = shape;
+        m_freq = frequency;
+        waveform = new float[floats_per_cycle];
+        switch(shape) {
+            case SINE:
+                sine_Wave();
+                break;
+            case SQUARE:
+                square_Wave();
+                break;
+            case SAW:
+                saw_Wave();
+                break;
+            case RECTIFIED:
+                rectified_Wave();
+                break;
+            default:
+                sine_Wave();
+                break;
+        }
+    }
+
+    private void sine_Wave() {
+        int i = 0;
+
+        Log.d("WAVEFORM", "generating sine wave");
+        while (i < floats_per_cycle) {
+            waveform[i] = (float) Math.sin( (m_freq * two_pi * i) / sample_rate);
+            i++;
+        }
+    }
+
+    private void square_Wave() {
+        int i = 0;
+        while (i < floats_per_cycle) {
+            if ((float) Math.sin( (m_freq * two_pi * i) / sample_rate) > 0) {
+                waveform[i] = (float)1.0;
+            } else {
+                waveform[i] = (float)-1.0;
+            }
+            i++;
+        }
+    }
+
+    private void saw_Wave() {
+        int i = 0;
+        while (i < floats_per_cycle) {
+            waveform[i] = (float)(i/floats_per_cycle);
+            i++;
+        }
+    }
+
+    private void rectified_Wave() {
+        int i = 0;
+        while (i < floats_per_cycle) {
+            waveform[i] = (float)( Math.abs( Math.sin( (m_freq * two_pi * i) / sample_rate) ) );
+        }
     }
 }

@@ -1,13 +1,8 @@
 package com.example.wattookee0.mugen;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -17,6 +12,7 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity {
 
     Tone current_tone = new Tone();
+    Waveform waveform = new Waveform(440, Waveform.shape_e.SINE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
-        final Waveform waveform_graph = (Waveform) findViewById((R.id.waveform_graph));
+        final WaveformView waveform_View_graph = (WaveformView) findViewById((R.id.waveform_graph));
 
         final SeekBar freq_bar = (SeekBar) findViewById(R.id.freq_bar);
             freq_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -42,30 +38,58 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    current_tone.set_Freq(seekBar.getProgress());
-                    current_tone.generate_Sample();
-                    waveform_graph.set_Waveform(current_tone.get_Sample(), current_tone.get_Floats_Per_Cycle());
-                    waveform_graph.invalidate();
-                    Log.d("ONSTOPTRACKINGTOUCH", "non-null seekBar");
+                    waveform.set_waveform(seekBar.getProgress(), Waveform.shape_e.SINE);
+                    waveform_View_graph.set_Waveform(waveform);
+                    waveform_View_graph.invalidate();
                 }
             });
         final SeekBar pitch_bar = (SeekBar) findViewById(R.id.pitch_bar);
+            pitch_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    //current_tone.set_Pitch(seekBar.getProgress()-seekBar.getMax()/2);
+                    //current_tone.generate_Sample();
+                    //waveform_View_graph.set_Waveform(current_tone.get_Sample(), current_tone.get_Floats_Per_Cycle());
+                    //waveform_View_graph.invalidate();
+                }
+            });
         final SeekBar volume_bar = (SeekBar) findViewById(R.id.volume_bar);
+            volume_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    //current_tone.set_Volume(seekBar.getProgress()/100);
+                    //current_tone.generate_Sample();
+                    //waveform_View_graph.set_Waveform(current_tone.get_Sample(), current_tone.get_Floats_Per_Cycle());
+                    //waveform_View_graph.invalidate();
+                }
+            });
 
        FloatingActionButton play_button = (FloatingActionButton) findViewById(R.id.play_button);
             play_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("FREQ_BAR", "progress: " + freq_bar.getProgress());
-                Log.d("PITCH_BAR", "progress: " + pitch_bar.getProgress());
-                Log.d("VOL_BAR", "progress: " + volume_bar.getProgress());
-                Log.d("VOL_BAR", "progress: " + ((float)volume_bar.getProgress()/100));
-                Log.d("POINTER", "current_tone " + current_tone);
                 current_tone.set_Duration(5);
-                current_tone.set_Pitch(pitch_bar.getProgress() - 10);
-                current_tone.set_Volume(((float)volume_bar.getProgress()/100));
-                Log.d("POINTER", "current_tone " + current_tone);
-                current_tone.play_Tone();
+                current_tone.play_Tone(waveform);
             }
         });
 
