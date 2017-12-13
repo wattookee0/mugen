@@ -1,6 +1,9 @@
 package com.example.wattookee0.mugen;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.SeekBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -24,7 +27,26 @@ public class MainActivity extends AppCompatActivity {
 
         final WaveformView waveform_View_graph = (WaveformView) findViewById((R.id.waveform_graph));
 
-        final SeekBar freq_bar = (SeekBar) findViewById(R.id.freq_bar);
+        /*final SeekBar amp_bar = (SeekBar) findViewById(R.id.amplitude);
+            amp_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    Log.d("MAIN:", "setting amplitude to " + seekBar.getProgress());
+                    waveform.amplitude = (float)(10.0*(seekBar.getProgress() + 1.0));
+                }
+            });*/
+
+        /*final SeekBar freq_bar = (SeekBar) findViewById(R.id.freq_bar);
             freq_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -38,12 +60,29 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    waveform.set_waveform(seekBar.getProgress(), Waveform.shape_e.SINE);
+                    waveform.set_waveform((float)seekBar.getProgress(), Waveform.shape_e.SINE);
                     waveform_View_graph.set_Waveform(waveform);
                     waveform_View_graph.invalidate();
                 }
+            });*/
+        final SeekBar harmonicsBar = (SeekBar) findViewById(R.id.harmonicsBar);
+            harmonicsBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    waveform.set_harmonic_shift(seekBar.getProgress() - seekBar.getMax()/2);
+                }
             });
-        final SeekBar pitch_bar = (SeekBar) findViewById(R.id.pitch_bar);
+        final SeekBar pitch_bar = (SeekBar) findViewById(R.id.pitch);
             pitch_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -57,10 +96,11 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
+                    waveform.set_waveform(seekBar.getProgress()-57, Waveform.shape_e.SINE);
                     //current_tone.set_Pitch(seekBar.getProgress()-seekBar.getMax()/2);
                     //current_tone.generate_Sample();
-                    //waveform_View_graph.set_Waveform(current_tone.get_Sample(), current_tone.get_Floats_Per_Cycle());
-                    //waveform_View_graph.invalidate();
+                    waveform_View_graph.set_Waveform(waveform);
+                    waveform_View_graph.invalidate();
                 }
             });
         final SeekBar volume_bar = (SeekBar) findViewById(R.id.volume_bar);

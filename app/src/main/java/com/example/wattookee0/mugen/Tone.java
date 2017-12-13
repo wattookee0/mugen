@@ -19,7 +19,7 @@ public class Tone {
 
     //user defined variables
     int track_duration_in_seconds = 2;
-    private float volume = 1.0f;
+    private float volume = 0.01f;
 
     //objects
     AudioTrack track;
@@ -45,7 +45,7 @@ public class Tone {
         track.setBufferSizeInFrames(waveform.floats_per_cycle);
         track.write(waveform.waveform, 0, (int)waveform.floats_per_cycle, AudioTrack.WRITE_NON_BLOCKING);
         track.setVolume(volume);
-        track.setLoopPoints(0, waveform.floats_per_cycle-1, -1);
+        track.setLoopPoints(0, waveform.floats_per_cycle, -1);
         track.play();
         Timer track_timer = new Timer();
         TimerTask track_length = new TimerTask() {
