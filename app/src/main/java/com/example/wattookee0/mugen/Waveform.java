@@ -21,6 +21,7 @@ public class Waveform {
     public float amplitude;
     public float waveform[];
     private float m_freq;
+    private float m_min_freq;
     private int harmonic_shift;
     private final int max_harmonic_shift = 6;
     public int floats_per_cycle;
@@ -61,8 +62,17 @@ public class Waveform {
     }
 
     public void set_waveform(int n, shape_e shape) {
+        //calculate frequency from n
         m_freq = (float)(440*Math.pow(2.0, (double)n/12.0));
-        floats_per_cycle = (int)(sample_rate/m_freq);
+
+        //use the lowest harmonic (longest period wave) to set the floats_per_cycle
+        int divisor = harmonic_shift-(max_harmonic_shift/2);
+        if (divisor != 0) {
+            m_min_freq = m_freq/Math.abs(divisor);
+        } else {
+            m_min_freq = m_freq;
+        }
+        floats_per_cycle = (int)(sample_rate/m_min_freq);
         m_shape = shape;
         waveform = new float[floats_per_cycle];
         switch(shape) {
