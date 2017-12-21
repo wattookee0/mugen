@@ -1,9 +1,13 @@
 package com.example.wattookee0.mugen;
 
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.GridView;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +15,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.lang.reflect.Array;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,64 +30,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         final WaveformView waveform_View_graph = (WaveformView) findViewById((R.id.waveform_graph));
 
-        /*final SeekBar amp_bar = (SeekBar) findViewById(R.id.amplitude);
-            amp_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    Log.d("MAIN:", "setting amplitude to " + seekBar.getProgress());
-                    waveform.amplitude = (float)(10.0*(seekBar.getProgress() + 1.0));
-                }
-            });*/
-
-        /*final SeekBar freq_bar = (SeekBar) findViewById(R.id.freq_bar);
-            freq_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    waveform.set_waveform((float)seekBar.getProgress(), Waveform.shape_e.SINE);
-                    waveform_View_graph.set_Waveform(waveform);
-                    waveform_View_graph.invalidate();
-                }
-            });*/
-        final SeekBar harmonicsBar = (SeekBar) findViewById(R.id.harmonicsBar);
-            harmonicsBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    waveform.set_harmonic_shift(seekBar.getProgress() - seekBar.getMax()/2);
-                }
-            });
         final SeekBar pitch_bar = (SeekBar) findViewById(R.id.pitch);
             pitch_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -136,6 +86,44 @@ public class MainActivity extends AppCompatActivity {
     // Example of a call to a native method
     //TextView tv = (TextView) findViewById(R.id.sample_text);
     //tv.setText(stringFromJNI());
+    }
+
+    public void onCheckboxClicked(View view) {
+        boolean checked = ((CheckBox) view).isChecked();
+        int value = 0;
+
+        switch (view.getId()) {
+            case R.id.harmonic_minus1:
+                value = -2;
+                break;
+            case R.id.harmonic_minus2:
+                value = -3;
+                break;
+            case R.id.harmonic_minus3:
+                value = -4;
+                break;
+            case R.id.harmonic_plus1:
+                value = 2;
+                break;
+            case R.id.harmonic_plus2:
+                value = 3;
+                break;
+            case R.id.harmonic_plus3:
+                value = 4;
+                break;
+
+        }
+
+        Log.d("MAIN", "id:" + view.getId() + " value:" + value + " checked:" + checked);
+
+        if (checked) {
+            Log.d("MAIN", "setting harmonic");
+            waveform.set_harmonic(value);
+        } else {
+            Log.d("MAIN", "removing harmonic");
+            waveform.remove_harmonic(value);
+        }
+
     }
 
     @Override

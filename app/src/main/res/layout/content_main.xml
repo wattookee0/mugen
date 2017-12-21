@@ -75,7 +75,7 @@
         android:text="Pitch:"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/harmonicsBar" />
+        app:layout_constraintTop_toBottomOf="@+id/harmonic_plus3" />
 
     <SeekBar
         android:id="@+id/pitch"
@@ -98,23 +98,77 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Harmonics Shift"
+        android:text="Harmonics"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <SeekBar
-        android:id="@+id/harmonicsBar"
-        style="@style/Widget.AppCompat.SeekBar.Discrete"
-        android:layout_width="0dp"
-        android:layout_height="33dp"
+    <CheckBox
+        android:id="@+id/harmonic_minus3"
+        android:layout_width="54dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="-4"
+        android:onClick="onCheckboxClicked"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/harmonics" />
+
+    <CheckBox
+        android:id="@+id/harmonic_minus2"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="-3"
+        android:onClick="onCheckboxClicked"
+        app:layout_constraintStart_toEndOf="@+id/harmonic_minus3"
+        app:layout_constraintTop_toBottomOf="@+id/harmonics" />
+
+    <CheckBox
+        android:id="@+id/harmonic_minus1"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="-2"
+        android:onClick="onCheckboxClicked"
+        app:layout_constraintStart_toEndOf="@+id/harmonic_minus2"
+        app:layout_constraintTop_toBottomOf="@+id/harmonics" />
+
+    <CheckBox
+        android:id="@+id/harmonic_plus1"
+        android:layout_width="54dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="+2"
+        android:onClick="onCheckboxClicked"
+        app:layout_constraintStart_toEndOf="@+id/harmonic_minus1"
+        app:layout_constraintTop_toBottomOf="@+id/harmonics" />
+
+    <CheckBox
+        android:id="@+id/harmonic_plus2"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="+3"
+        android:onClick="onCheckboxClicked"
+        app:layout_constraintStart_toEndOf="@+id/harmonic_plus1"
+        app:layout_constraintTop_toBottomOf="@+id/harmonics" />
+
+    <CheckBox
+        android:id="@+id/harmonic_plus3"
+        android:layout_width="55dp"
+        android:layout_height="31dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
-        android:max="6"
-        android:progress="3"
+        android:layout_marginTop="8dp"
+        android:text="+4"
+        android:onClick="onCheckboxClicked"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/harmonic_plus2"
         app:layout_constraintTop_toBottomOf="@+id/harmonics" />
 
 </android.support.constraint.ConstraintLayout>
