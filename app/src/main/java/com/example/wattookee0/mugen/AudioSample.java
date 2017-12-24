@@ -25,7 +25,7 @@ public class AudioSample {
         sample = new float[sample_length];
         /*int i = 0;
         while (i < (int)sample_length) {
-            sample[i] = (float)(volume[i]*Math.sin(((frequency[i]+pitch[i]) * two_pi * i)/sample_rate));
+            sample[i] = (float)(volume[i]*Math.sin(((frequency[i]+pitch[i]) * TWO_PI * i)/m_sample_rate));
             i++;
         }*/
         return sample;

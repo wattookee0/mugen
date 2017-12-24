@@ -1,11 +1,7 @@
 package com.example.wattookee0.mugen;
 
 import android.util.Log;
-
-import java.lang.reflect.Array;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created by wattookee0 on 11/28/2017.
@@ -20,23 +16,24 @@ public class Waveform {
         RECTIFIED
     }
 
-    static final int sample_rate = 192000;
-    static final float two_pi = (float)Math.PI*2;
+    static final int m_sample_rate = 192000;
+    static final float TWO_PI = (float)Math.PI*2;
     static final int MINIMUM_AUDIBLE_FREQ = 20;
     static final int MAXIMUM_AUDIBLE_FREQ = 20000;
+    static final int MAX_ALLOWED_HARMONICS = 6;
 
-    public float amplitude;
+    public float m_amplitude;
+
     public float waveform[];
-    private HashSet<Integer> harmonics = new HashSet<>();
+    private HashSet<harmonic> m_harmonics = new HashSet<harmonic>(MAX_ALLOWED_HARMONICS);
+
     private float m_freq;
     private float m_min_freq;
-    private int harmonic_shift;
-    private final int max_harmonic_shift = 6;
-    public int floats_per_cycle;
+    public int m_floats_per_cycle;
     private shape_e m_shape;
 
     public int get_floats_per_cycle() {
-        return floats_per_cycle;
+        return m_floats_per_cycle;
     }
 
     public float[] get_waveform() {
@@ -44,42 +41,26 @@ public class Waveform {
     }
 
     public boolean set_harmonic(int harmonic_n) {
-        //check validity of harmonic_n
-        if (harmonic_n >= -1 && harmonic_n <= 1)  { //don't allow -1, 0, or 1
-            return false;
-        } else if (harmonic_n < -1) {   //check to see if the harmonic will be audible
-            if (m_freq/Math.abs(harmonic_n) < MINIMUM_AUDIBLE_FREQ) {
-                Log.d("WAVEFORM", "harmonic inaudible! (low):" + m_freq/Math.abs(harmonic_n) + " harm:" + harmonic_n + " m_freq:" + m_freq);
-                return false;
-            }
-        } else if (harmonic_n > 1) {    //check to see if the harmonic will be audible
-            if (m_freq*harmonic_n > MAXIMUM_AUDIBLE_FREQ) {
-                Log.d("WAVEFORM", "harmonic inaudible! (high):" + m_freq*harmonic_n + " harm:" + harmonic_n + " m_freq:" + m_freq);
-                return false;
-            }
-        }
-
-        harmonics.add(harmonic_n);
-
-        Log.d("WAVEFORM", "(add)harmonics: " + harmonics);
+        m_harmonics.add(new harmonic(m_freq, harmonic_n, (float)1.0, shape_e.SINE));
+        Log.d("WAVEFORM", "(add)harmonics: " + m_harmonics);
         return true;
     }
 
     public boolean remove_harmonic(int harmonic_n) {
-        if (harmonics.contains(harmonic_n)) {
-            harmonics.remove(harmonic_n);
+        if (m_harmonics.contains(harmonic_n)) {
+            m_harmonics.remove(harmonic_n);
         }
-        Log.d("WAVEFORM", "(remove)harmonics: " + harmonics);
+        Log.d("WAVEFORM", "(remove)harmonics: " + m_harmonics);
         return true;
     }
 
-    public void set_amplitude(float new_amplitude) { amplitude = new_amplitude;}
+    public void set_amplitude(float new_amplitude) { m_amplitude = new_amplitude;}
 
-    public void set_waveform(float new_frequency, shape_e shape) {
-        floats_per_cycle = (int)(sample_rate/new_frequency);
+    public void set_waveform(float new_frequency, shape_e shape, HashSet<Integer> new_harmonics) {
+        m_floats_per_cycle = (int)(m_sample_rate /new_frequency);
         m_shape = shape;
         m_freq = new_frequency;
-        waveform = new float[floats_per_cycle];
+        waveform = new float[m_floats_per_cycle];
         switch(shape) {
             case SINE:
                 sine_Wave();
@@ -103,13 +84,13 @@ public class Waveform {
         return (float)(440*Math.pow(2.0, (double)n/12.0));
     }
 
-    private float calculate_minimum_freq(Set<Integer> harmonics) {
+    private float calculate_minimum_freq(HashSet<Integer> check_harmonics) {
         int min_harmonic = Integer.MAX_VALUE;
         float min_freq = Float.MAX_VALUE;
-        Integer[] harmonics_array = harmonics.toArray(new Integer[harmonics.size()]);
+        Integer[] harmonics_array = check_harmonics.toArray(new Integer[check_harmonics.size()]);
 
         int i = 0;
-        while (i < harmonics.size()) {
+        while (i < check_harmonics.size()) {
             if (harmonics_array[i] < min_harmonic) {
                 min_harmonic = harmonics_array[i];
             }
@@ -121,23 +102,17 @@ public class Waveform {
         } else {
             min_freq = m_freq;  //assume that "non-negative" harmonics will always be higher freq than fundamental freq
         }
+        Log.d("WAVEFORM", "min freq = " + min_freq + " m_freq = " + m_freq);
         return min_freq;
     }
 
-    public void set_waveform(int n, shape_e shape) {
+    public void set_waveform(int n, shape_e shape, HashSet<Integer> new_harmonics) {
         //calculate frequency from n
-        m_freq = (float)(440*Math.pow(2.0, (double)n/12.0));
+        m_freq = calculate_freq_from_n(n);
 
-        //use the lowest harmonic (longest period wave) to set the floats_per_cycle
-        int divisor = harmonic_shift-(max_harmonic_shift/2);
-        if (divisor != 0) {
-            m_min_freq = m_freq/Math.abs(divisor);
-        } else {
-            m_min_freq = m_freq;
-        }
-        floats_per_cycle = (int)(sample_rate/m_min_freq);
+        m_floats_per_cycle = (int)(m_sample_rate /m_min_freq);
         m_shape = shape;
-        waveform = new float[floats_per_cycle];
+        waveform = new float[m_floats_per_cycle];
         switch(shape) {
             case SINE:
                 sine_Wave();
@@ -157,12 +132,13 @@ public class Waveform {
         }
     }
 
-    public Waveform(int n, shape_e shape) {
-        amplitude = (float)100.0;
-        m_freq = (float)(440*Math.pow(2.0,(double)n));
-        floats_per_cycle = (int)(sample_rate/m_freq);
+    public Waveform(int n, shape_e shape, HashSet<Integer> new_harmonics) {
+        m_amplitude = (float)100.0;
+        m_freq = (float)calculate_freq_from_n(n);
+        m_floats_per_cycle = (int)(m_sample_rate /m_freq);
         m_shape = shape;
-        waveform = new float[floats_per_cycle];
+        waveform = new float[m_floats_per_cycle];
+
         switch(shape) {
             case SINE:
                 sine_Wave();
@@ -183,11 +159,11 @@ public class Waveform {
     }
 
     public Waveform(float frequency, shape_e shape) {
-        amplitude = (float)1.0;
-        floats_per_cycle = (int)(sample_rate/frequency);
+        m_amplitude = (float)1.0;
+        m_floats_per_cycle = (int)(m_sample_rate /frequency);
         m_shape = shape;
         m_freq = frequency;
-        waveform = new float[floats_per_cycle];
+        waveform = new float[m_floats_per_cycle];
         switch(shape) {
             case SINE:
                 sine_Wave();
@@ -207,56 +183,30 @@ public class Waveform {
         }
     }
 
-    public void set_harmonic_shift(int shift) {
-        harmonic_shift = shift;
+    private void sine_Wave(harmonic harmonic) {
+        int i = 0;
+        while (i < harmonic.h_floats_per_cycle) {
+            harmonic.h_waveform[i] += (float) ( (harmonic.h_amplitude/2) * Math.sin((harmonic.h_freq * TWO_PI * i) / m_sample_rate));
+            i++;
+        }
     }
 
     private void sine_Wave() {
-        int half_max_shift = max_harmonic_shift/2;
         int i = 0;
-        int j = 0;
-        int divisor = 1;
-        float multiplier = (float)1.0;
-        float A = amplitude / 2;
+        float A = m_amplitude / 2;
         Log.d("WAVEFORM", "generating sine wave with amplitude " + A);
 
-        Integer[] harmonics_array = {};
-        if (harmonics != null) {
-            if (!harmonics.isEmpty()) {
-                harmonics_array = harmonics.toArray(new Integer[harmonics.size()]);
-            }
+        while (i < m_floats_per_cycle) {
+            waveform[i] += (float) ( (A) * Math.sin((m_freq * TWO_PI * i) / m_sample_rate));
+            i++;
         }
 
-        while (j <= harmonics_array.length) {
-            if (harmonics_array != null && j != harmonics_array.length) {
-                if (harmonics_array[j] < 0) {
-                    divisor = Math.abs(2 * harmonics_array[j]);
-                    multiplier = (float) 1.0 / Math.abs(harmonics_array[j]);
-                } else {    //must be positive, we don't allow 0
-                    multiplier = harmonics_array[j];
-                }
-            }
-
-            if (j == harmonics_array.length) {
-                //when you're through the array, do the fundamental frequency
-                divisor = 1;
-                multiplier = (float)1.0;
-            }
-
-            Log.d("WAVEFORM", "j=" + j + " mult=" + multiplier + " div=" + divisor + " A/div=" + A/divisor + " freq*mult =" + m_freq*multiplier);
-            while (i < floats_per_cycle) {
-                waveform[i] += (float) ( (A) * Math.sin((multiplier * m_freq * two_pi * i) / sample_rate));
-                i++;
-            }
-            i = 0;
-            j++;
-        }
     }
 
     private void square_Wave() {
         int i = 0;
-        while (i < floats_per_cycle) {
-            if ((float) Math.sin( (m_freq * two_pi * i) / sample_rate) > 0) {
+        while (i < m_floats_per_cycle) {
+            if ((float) Math.sin( (m_freq * TWO_PI * i) / m_sample_rate) > 0) {
                 waveform[i] = (float)1.0;
             } else {
                 waveform[i] = (float)-1.0;
@@ -267,16 +217,61 @@ public class Waveform {
 
     private void saw_Wave() {
         int i = 0;
-        while (i < floats_per_cycle) {
-            waveform[i] = (float)(i/floats_per_cycle);
+        while (i < m_floats_per_cycle) {
+            waveform[i] = (float)(i/m_floats_per_cycle);
             i++;
         }
     }
 
     private void rectified_Wave() {
         int i = 0;
-        while (i < floats_per_cycle) {
-            waveform[i] = (float)( Math.abs( Math.sin( (m_freq * two_pi * i) / sample_rate) ) );
+        while (i < m_floats_per_cycle) {
+            waveform[i] = (float)( Math.abs( Math.sin( (m_freq * TWO_PI * i) / m_sample_rate) ) );
+        }
+    }
+
+    private class harmonic {
+        float h_freq;
+        float h_amplitude;
+        float[] h_waveform;
+        int h_floats_per_cycle;
+        shape_e h_shape;
+
+        public harmonic(float fundamental_freq, int n, float new_amplitude, shape_e new_shape) throws IllegalArgumentException {
+            //check for valid fundamentals
+            //note: technically you could get valid harmonics from invalid fundamentals... but why try?
+            if ((fundamental_freq < MINIMUM_AUDIBLE_FREQ) || (fundamental_freq > MAXIMUM_AUDIBLE_FREQ)) {
+                throw new IllegalArgumentException("Invalid fundamental frequency in new harmonic, must be greater than "
+                        + MINIMUM_AUDIBLE_FREQ + " and less than " + MAXIMUM_AUDIBLE_FREQ + ".");
+            }
+
+            //check for valid harmonics
+            if (n < -1) {
+                h_freq = fundamental_freq/n;
+                if (h_freq < MINIMUM_AUDIBLE_FREQ) {
+                    throw new IllegalArgumentException("Invalid n, resulting harmonic inaudible.");
+                }
+            } else if (n > 1) {
+                h_freq = fundamental_freq*n;
+                if (h_freq < MAXIMUM_AUDIBLE_FREQ) {
+                    throw new IllegalArgumentException("Invalid n, resulting harmonic inaudible.");
+                }
+            } else {
+                throw new IllegalArgumentException("Invalid n in new harmonic.  Must be < -1 or > 1");
+            }
+
+            if (new_amplitude > 0.0) {
+                h_amplitude = new_amplitude;
+            } else {
+                throw new IllegalArgumentException("Invalid amplitude in new harmonic, must be > 0.0");
+            }
+
+            //everything checked out, let's get on it with
+            h_floats_per_cycle = m_sample_rate /(int) h_freq;
+
+            h_waveform = new float[h_floats_per_cycle];
+            h_shape = new_shape;
+            sine_Wave(this);
         }
     }
 }
