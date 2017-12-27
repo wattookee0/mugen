@@ -62,7 +62,7 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
         Paint brush = new Paint();
         super.onDraw(canvas);
         if (waveform == null) {
-            Log.d("WAVEFORMVIEW", "no waveform");
+            Log.d("WAVEFORMVIEW", "no m_waveform");
         } else {
             Log.d("WAVEFORMVIEW", "onDraw()");
             canvas.drawColor(Color.WHITE);
@@ -86,11 +86,11 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
             }
             brush = wave_brush();
             Path path = new Path();
-            path.moveTo(0,canvas_middle-waveform.waveform[0]);
-            Log.d("WAVEFORMVIEW", "length: "+ waveform.floats_per_cycle);
+            path.moveTo(0,canvas_middle-waveform.m_waveform[0]);
+            Log.d("WAVEFORMVIEW", "length: "+ waveform.m_floats_per_cycle);
             i = 0;
-            while ( (i*x_scale < canvas.getWidth()) && (i < waveform.floats_per_cycle) ) {
-                path.lineTo((float)(i*x_scale), canvas_middle - (float) y_scale * waveform.waveform[i]);
+            while ( (i*x_scale < canvas.getWidth()) && (i < waveform.m_floats_per_cycle) ) {
+                path.lineTo((float)(i*x_scale), canvas_middle - (float) y_scale * waveform.m_waveform[i]);
                 i++;
             }
             canvas.drawPath(path, brush);
@@ -99,8 +99,8 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
 
     private double calculate_x_scale(Waveform waveform, Canvas canvas) {
         double scale;
-            scale = (double) canvas.getWidth() / waveform.floats_per_cycle;
-        Log.d("XSCALE", "xscale=" + scale + " canwidth=" + canvas.getWidth() + " floats=" + waveform.floats_per_cycle);
+            scale = (double) canvas.getWidth() / waveform.m_floats_per_cycle;
+        Log.d("XSCALE", "xscale=" + scale + " canwidth=" + canvas.getWidth() + " floats=" + waveform.m_floats_per_cycle);
         return scale;
     }
 
@@ -109,14 +109,14 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
         float max_negative = (float) -0.0;
         float amplitude = (float) 0.0;
         int i = 0;
-        while (i < waveform.floats_per_cycle) {
-            if (waveform.waveform[i] > (float) 0.0) {
-                if (waveform.waveform[i] > max_positive) {
-                    max_positive = waveform.waveform[i];
+        while (i < waveform.m_floats_per_cycle) {
+            if (waveform.m_waveform[i] > (float) 0.0) {
+                if (waveform.m_waveform[i] > max_positive) {
+                    max_positive = waveform.m_waveform[i];
                 }
-            } else if (waveform.waveform[i] < (float) 0.0) {
-                if (waveform.waveform[i] < max_negative) {
-                    max_negative = waveform.waveform[i];
+            } else if (waveform.m_waveform[i] < (float) 0.0) {
+                if (waveform.m_waveform[i] < max_negative) {
+                    max_negative = waveform.m_waveform[i];
                 }
             }
             i++;
@@ -128,6 +128,6 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
 
     public void set_Waveform(Waveform new_waveform) {
         waveform = new_waveform;
-        Log.d("WAVEFORMVIEW", "waveform: " + waveform);
+        Log.d("WAVEFORMVIEW", "m_waveform: " + waveform);
     }
 }

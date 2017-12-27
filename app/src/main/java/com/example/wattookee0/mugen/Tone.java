@@ -3,7 +3,6 @@ package com.example.wattookee0.mugen;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -42,10 +41,10 @@ public class Tone {
                 AudioFormat.ENCODING_PCM_FLOAT,
                 sample_rate,
                 AudioManager.MODE_NORMAL);
-        track.setBufferSizeInFrames(waveform.floats_per_cycle);
-        track.write(waveform.waveform, 0, (int)waveform.floats_per_cycle, AudioTrack.WRITE_NON_BLOCKING);
+        track.setBufferSizeInFrames(waveform.m_floats_per_cycle);
+        track.write(waveform.m_waveform, 0, waveform.m_floats_per_cycle, AudioTrack.WRITE_NON_BLOCKING);
         track.setVolume(volume);
-        track.setLoopPoints(0, waveform.floats_per_cycle, -1);
+        track.setLoopPoints(0, waveform.m_floats_per_cycle, -1);
         track.play();
         Timer track_timer = new Timer();
         TimerTask track_length = new TimerTask() {

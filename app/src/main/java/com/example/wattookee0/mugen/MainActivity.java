@@ -17,11 +17,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.lang.reflect.Array;
+import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
 
     Tone current_tone = new Tone();
-    Waveform waveform = new Waveform(440, Waveform.shape_e.SINE);
+    Waveform waveform = new Waveform(0, Waveform.shape_e.SINE, null);
+    HashSet<Integer> harmonics = new HashSet<Integer>(6);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    waveform.set_waveform(seekBar.getProgress()-57, Waveform.shape_e.SINE);
-                    //current_tone.set_Pitch(seekBar.getProgress()-seekBar.getMax()/2);
-                    //current_tone.generate_Sample();
+                    waveform = new Waveform(seekBar.getProgress()-57, Waveform.shape_e.SINE, harmonics.toArray(new Integer[harmonics.size()]));
                     waveform_View_graph.set_Waveform(waveform);
                     waveform_View_graph.invalidate();
                 }
@@ -111,17 +111,16 @@ public class MainActivity extends AppCompatActivity {
             case R.id.harmonic_plus3:
                 value = 4;
                 break;
-
         }
 
         Log.d("MAIN", "id:" + view.getId() + " value:" + value + " checked:" + checked);
-
+        boolean fail = false;
         if (checked) {
             Log.d("MAIN", "setting harmonic");
-            waveform.set_harmonic(value);
+            harmonics.add(value);
         } else {
             Log.d("MAIN", "removing harmonic");
-            waveform.remove_harmonic(value);
+            harmonics.remove(value);
         }
 
     }
