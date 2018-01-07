@@ -38,11 +38,32 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    private Paint wave_brush() {
+    private Paint wave_brush(int color) {
         Paint brush = new Paint();
-        brush.setColor(Color.BLUE);
+        switch(color) {
+            case 0: brush.setColor(Color.BLUE);
+            break;
+            case 1: brush.setColor(Color.RED);
+            break;
+            case 2: brush.setColor(Color.GREEN);
+            break;
+            case 3: brush.setColor(Color.BLACK);
+            break;
+            case 4: brush.setColor(Color.CYAN);
+            break;
+            case 5: brush.setColor(Color.MAGENTA);
+            break;
+            case 6: brush.setColor(Color.DKGRAY);
+            break;
+            default: brush.setColor(Color.GRAY);
+            break;
+        }
         brush.setStyle(Paint.Style.STROKE);
-        brush.setStrokeWidth(2);
+        if (color < 0) {
+            brush.setStrokeWidth(10);
+        } else {
+            brush.setStrokeWidth(2);
+        }
         return brush;
     }
 
@@ -56,7 +77,8 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
 
     @Override
     protected void onDraw(Canvas canvas) {
-        int i = 0;
+        int i = 0, j = 0, k = -1;
+        int iterations = 2;
         double y_scale = 0.0;
         double x_scale = 1.0;
         Paint brush = new Paint();
@@ -66,6 +88,8 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
         } else {
             Log.d("WAVEFORMVIEW", "onDraw()");
             canvas.drawColor(Color.WHITE);
+            float[] wave;
+            int floats;
             int canvas_middle = canvas.getHeight()/2;
             y_scale = calculate_y_scale(waveform, canvas);
             x_scale = calculate_x_scale(waveform, canvas);
@@ -75,7 +99,7 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
             while (i*y_scale < canvas.getHeight()) {
                 y = (float)(i*y_scale);
                 canvas.drawLine(0, y, canvas.getWidth(), y, brush);
-                i+=200;
+                i+=10;
             }
             float x = 0;
             i = 1;
@@ -84,22 +108,37 @@ public class WaveformView extends SurfaceView implements SurfaceHolder.Callback 
                 canvas.drawLine(x, 0, x, canvas.getHeight(), brush);
                 i+=200;
             }
-            brush = wave_brush();
-            Path path = new Path();
-            path.moveTo(0,canvas_middle-waveform.m_waveform[0]);
-            Log.d("WAVEFORMVIEW", "length: "+ waveform.m_floats_per_cycle);
-            i = 0;
-            while ( (i*x_scale < canvas.getWidth()) && (i < waveform.m_floats_per_cycle) ) {
-                path.lineTo((float)(i*x_scale), canvas_middle - (float) y_scale * waveform.m_waveform[i]);
-                i++;
+            while (k < waveform.m_num_harmonics) {
+                if (k < 0) {
+                    wave = waveform.m_waveform;
+                } else {
+                    wave = waveform.get_harmonic(k);
+                }
+                iterations = 2*waveform.m_floats_per_cycle/wave.length;
+                brush = wave_brush(k);
+                Path path = new Path();
+                path.moveTo(0, canvas_middle - (float) y_scale * wave[0]);
+                Log.d("WAVEFORMVIEW", "floats:" + waveform.m_floats_per_cycle + " length:" + wave.length + " iterations:" + iterations+" waveform:" + wave);
+                i = 0;
+                while (((i + j) * x_scale < canvas.getWidth()) && (i + j < iterations * wave.length)) {
+                    while (i < wave.length) {
+                        path.lineTo((float) ((i + j) * x_scale), canvas_middle - (float) y_scale * wave[i]);
+                        i++;
+                    }
+                    j += wave.length;
+                    i = 0;
+                }
+                canvas.drawPath(path, brush);
+                i = 0;
+                j = 0;
+                k++;
             }
-            canvas.drawPath(path, brush);
         }
     }
 
     private double calculate_x_scale(Waveform waveform, Canvas canvas) {
         double scale;
-            scale = (double) canvas.getWidth() / waveform.m_floats_per_cycle;
+            scale = (double) canvas.getWidth() / (2*waveform.m_floats_per_cycle);
         Log.d("XSCALE", "xscale=" + scale + " canwidth=" + canvas.getWidth() + " floats=" + waveform.m_floats_per_cycle);
         return scale;
     }

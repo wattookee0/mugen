@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class AudioSample {
 
     static final float two_pi = 2*(float)Math.PI;
-    static final float sample_rate = 192000;
+    static final float sample_rate = 48000;
 
     float volume[];
     public float sample[];

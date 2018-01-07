@@ -21,7 +21,6 @@ import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
 
-    Tone current_tone = new Tone();
     Waveform waveform = new Waveform(0, Waveform.shape_e.SINE, null);
     HashSet<Integer> harmonics = new HashSet<Integer>(6);
 
@@ -78,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
             play_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Tone current_tone = new Tone();
                 current_tone.set_Duration(5);
                 current_tone.play_Tone(waveform);
             }
